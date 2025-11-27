@@ -1,0 +1,31 @@
+# Удаляем строку version: '3.8' полностью (она устарела)
+services:
+  auth-service:
+    image: kirill4goodmopsa/task-manager-auth-service:latest
+    container_name: auth-service
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data/auth:/data
+    environment:
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+    restart: unless-stopped
+
+  tasks-service:
+    image: kirill4goodmopsa/task-manager-tasks-service:latest
+    container_name: tasks-service
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./data/tasks:/data
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8080
+    depends_on:
+      - auth-service
+    restart: unless-stopped
+
+  frontend:
+    image: kirill4goodmopsa/task-manager-frontend:latest
+    ports:
+      - "3000:80"
+    restart: unless-stopped

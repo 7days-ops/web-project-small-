@@ -1,0 +1,13 @@
+# Database files
+data/
+*.db
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

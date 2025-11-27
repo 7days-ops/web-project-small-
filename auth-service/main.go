@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -107,15 +107,43 @@ type LoginResponse struct {
 
 func initDB() {
 	var err error
-	db, err = sql.Open("sqlite3", "/data/auth.db")
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("DB_PORT")
+	if port == "" {
+		port = "3306"
+	}
+	user := os.Getenv("DB_USER")
+	if user == "" {
+		user = "root"
+	}
+	password := os.Getenv("DB_PASSWORD")
+	if password == "" {
+		password = ""
+	}
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "task_manager"
+	}
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, dbName)
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Test connection
+	err = db.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	createTableSQL := `CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT UNIQUE NOT NULL,
-		password TEXT NOT NULL
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		username VARCHAR(255) UNIQUE NOT NULL,
+		password VARCHAR(255) NOT NULL
 	);`
 
 	_, err = db.Exec(createTableSQL)

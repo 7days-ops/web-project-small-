@@ -1,7 +1,7 @@
 # auth-service/Dockerfile   (и точно такой же для tasks-service)
 FROM golang:1.25-alpine AS builder
 
-RUN apk add --no-cache gcc musl-dev sqlite-dev
+RUN apk add --no-cache gcc musl-dev
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -12,14 +12,11 @@ RUN CGO_ENABLED=1 GOOS=linux go build -trimpath -ldflags="-s -w" -o main .
 # -----------------------------
 FROM alpine:latest
 
-RUN apk --no-cache add sqlite-libs tzdata
+RUN apk --no-cache add tzdata
 
 WORKDIR /app
 
 COPY --from=builder /app/main /usr/local/bin/main
-
-
-RUN mkdir /data && chmod 777 /data
 
 
 
